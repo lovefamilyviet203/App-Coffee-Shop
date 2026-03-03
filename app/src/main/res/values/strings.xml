@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">CoffeeShop</string>
+    <string name="see_all">See all</string>
+    <string name="popular_coffees">Popular Coffees</string>
+    <string name="category">Category</string>
+    <string name="wishlist">WishList</string>
+    <string name="my_order">My Order</string>
+    <string name="profile">Profile</string>
+    <string name="cart">Cart</string>
+    <string name="explorer">Explorer</string>
+    <string name="search_anything">Search anything</string>
+    <string name="back">Back</string>
+    <string name="coffee_size">Coffee Size</string>
+    <string name="small">Small</string>
+    <string name="medium">Medium</string>
+    <string name="large">Large</string>
+    <string name="qty">Qty.</string>
+    <string name="add_to_cart">Add to Cart</string>
+    <string name="description">Description</string>
+    <string name="enter_your_discount_code">Enter Your Discount Code</string>
+    <string name="proceed_to_checkout">Proceed to Checkout</string>
+</resources>
