@@ -7,6 +7,7 @@ import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.example.coffeeshop.Helper.TinyDB
 import com.example.coffeeshop.R
 import com.example.coffeeshop.adapters.CategoryAdapter
 import com.example.coffeeshop.adapters.PopularAdapter
@@ -32,6 +33,20 @@ class MainActivity : AppCompatActivity() {
         binding.cartBtn.setOnClickListener {
             startActivity(Intent(this, CartActivity::class.java))
         }
+        binding.myOrderBtn.setOnClickListener {
+            startActivity(Intent(this, MyOrderActivity::class.java))
+        }
+        binding.wishlistBtn.setOnClickListener {
+            startActivity(Intent(this, WishlistActivity::class.java))
+        }
+        binding.profileBtn.setOnClickListener {
+            startActivity(Intent(this, ProfileActivity::class.java))
+        }
+
+        // Load profile name
+        val tinyDB = TinyDB(this)
+        val name = tinyDB.getString("profile_name").ifEmpty { "Tina Anderson" }
+        binding.textView2.text = name
     }
 
     private fun initPopular() {

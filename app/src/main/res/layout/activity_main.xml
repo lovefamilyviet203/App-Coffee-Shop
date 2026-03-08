@@ -267,6 +267,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/wishlistBtn"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginTop="8dp"
@@ -290,6 +291,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/myOrderBtn"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginTop="8dp"
@@ -313,6 +315,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/profileBtn"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginTop="8dp"

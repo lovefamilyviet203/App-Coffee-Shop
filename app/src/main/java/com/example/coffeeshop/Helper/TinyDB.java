@@ -543,6 +543,27 @@ public class TinyDB {
         putListString(key, objStrings);
     }
 
+    public <T> void putListGeneric(String key, ArrayList<T> list) {
+        checkForNullKey(key);
+        Gson gson = new Gson();
+        ArrayList<String> objStrings = new ArrayList<String>();
+        for (T item : list) {
+            objStrings.add(gson.toJson(item));
+        }
+        putListString(key, objStrings);
+    }
+
+    public <T> ArrayList<T> getListGeneric(String key, Class<T> classOfT) {
+        Gson gson = new Gson();
+        ArrayList<String> objStrings = getListString(key);
+        ArrayList<T> list = new ArrayList<T>();
+        for (String jObjString : objStrings) {
+            T item = gson.fromJson(jObjString, classOfT);
+            list.add(item);
+        }
+        return list;
+    }
+
     /**
      * Remove SharedPreferences item with 'key'
      *
