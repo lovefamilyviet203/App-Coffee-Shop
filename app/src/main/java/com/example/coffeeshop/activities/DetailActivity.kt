@@ -25,6 +25,9 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun initSizeList() {
+
+        binding.SmallBtn.setBackgroundResource(R.drawable.brown_full_corner_bg)
+
         binding.apply {
             SmallBtn.setOnClickListener {
                 SmallBtn.setBackgroundResource(R.drawable.brown_full_corner_bg)

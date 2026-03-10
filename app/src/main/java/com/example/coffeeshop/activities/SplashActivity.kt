@@ -5,9 +5,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import com.example.coffeeshop.databinding.ActivitySplashBinding
+import com.google.firebase.auth.FirebaseAuth
 
 class SplashActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySplashBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -15,7 +17,15 @@ class SplashActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.startBtn.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
+            val auth = FirebaseAuth.getInstance()
+            if (auth.currentUser != null) {
+                // Đã đăng nhập rồi → vào thẳng Main
+                startActivity(Intent(this, MainActivity::class.java))
+            } else {
+                // Chưa đăng nhập → vào Login
+                startActivity(Intent(this, LoginActivity::class.java))
+            }
+            finish()
         }
     }
 }

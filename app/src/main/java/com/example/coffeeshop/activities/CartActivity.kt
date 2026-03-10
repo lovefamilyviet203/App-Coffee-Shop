@@ -1,5 +1,6 @@
 package com.example.coffeeshop.activities
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
@@ -44,6 +45,10 @@ class CartActivity : AppCompatActivity() {
 
     private fun setsVariable() {
         binding.backBtn.setOnClickListener { finish() }
+
+        binding.processBtn.setOnClickListener {
+            startActivity(Intent(this, PaymentActivity::class.java))
+        }
     }
 
     private fun calculateCart() {
