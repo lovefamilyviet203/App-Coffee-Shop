@@ -6,14 +6,17 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.enableEdgeToEdge
 import com.example.coffeeshop.Helper.ManagmentUser
+import com.example.coffeeshop.Helper.TinyDB
 import com.example.coffeeshop.databinding.ActivityLoginBinding
 
 import com.example.coffeeshop.service.UserFcmService
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
-    private lateinit var managmentUser: ManagmentUser
+    private lateinit var tinyDB: TinyDB
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,10 +24,10 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        managmentUser = ManagmentUser(this)
+        tinyDB = TinyDB(this)
 
         // If already logged in, skip to MainActivity
-        if (managmentUser.isLoggedIn()) {
+        if (FirebaseAuth.getInstance().currentUser != null) {
             goToMain()
             return
         }
@@ -39,13 +42,48 @@ class LoginActivity : AppCompatActivity() {
 
             if (!validate(email, password)) return@setOnClickListener
 
-            val success = managmentUser.login(email, password)
-            if (success) {
-                UserFcmService.registerToken(this)
-                goToMain()
-            } else {
-                showError("Incorrect email or password")
-            }
+            hideError()
+            binding.loginBtn.isEnabled = false
+
+            // ✅ Đăng nhập bằng Firebase Auth
+            FirebaseAuth.getInstance()
+                .signInWithEmailAndPassword(email, password)
+                .addOnSuccessListener { result ->
+                    val uid = result.user?.uid ?: return@addOnSuccessListener
+
+                    // ✅ Lấy thông tin user từ Realtime Database lưu vào TinyDB
+                    FirebaseDatabase.getInstance().reference
+                        .child("Users")
+                        .child(uid)
+                        .get()
+                        .addOnSuccessListener { snapshot ->
+                            tinyDB.putString("profile_name", snapshot.child("name").value?.toString() ?: "")
+                            tinyDB.putString("profile_email", snapshot.child("email").value?.toString() ?: email)
+                            tinyDB.putString("profile_phone", snapshot.child("phone").value?.toString() ?: "")
+
+                            UserFcmService.registerToken(this)
+                            goToMain()
+                        }
+                        .addOnFailureListener {
+                            // DB lỗi nhưng Auth OK → vẫn cho vào app
+                            tinyDB.putString("profile_email", email)
+                            UserFcmService.registerToken(this)
+                            goToMain()
+                        }
+                }
+                .addOnFailureListener { e ->
+                    binding.loginBtn.isEnabled = true
+                    when {
+                        e.message?.contains("no user record") == true ||
+                                e.message?.contains("password is invalid") == true ||
+                                e.message?.contains("INVALID_LOGIN_CREDENTIALS") == true ->
+                            showError("Incorrect email or password")
+                        e.message?.contains("badly formatted") == true ->
+                            showError("Invalid email format")
+                        else ->
+                            showError("Login failed: ${e.message}")
+                    }
+                }
         }
 
         binding.goToRegisterBtn.setOnClickListener {

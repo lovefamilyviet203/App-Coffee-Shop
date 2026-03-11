@@ -2,6 +2,7 @@ package com.example.coffeeshop.activities
 
 import android.net.Uri
 import android.Manifest
+import androidx.appcompat.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -63,6 +64,37 @@ class ProfileActivity : AppCompatActivity() {
         binding.saveProfileBtn.setOnClickListener {
             saveProfile()
         }
+
+        binding.logoutBtn.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Đăng xuất")
+                .setMessage("Bạn có chắc muốn đăng xuất không?")
+                .setPositiveButton("Đăng xuất") { _, _ ->
+                    performLogout()
+                }
+                .setNegativeButton("Huỷ", null)
+                .show()
+        }
+    }
+
+    private fun performLogout() {
+        // Đăng xuất Firebase
+        FirebaseAuth.getInstance().signOut()
+
+        // Xóa thông tin local
+        tinyDB.putString("profile_name", "")
+        tinyDB.putString("profile_email", "")
+        tinyDB.putString("profile_phone", "")
+        tinyDB.putString("profile_address", "")
+        tinyDB.putString("profile_avatar_uri", "")
+        tinyDB.putBoolean("isLoggedIn", false)
+        tinyDB.putString("currentUser", "")
+
+        // Về màn hình Login
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 
     private fun loadProfile() {

@@ -194,17 +194,31 @@
                     android:textSize="13sp"
                     android:visibility="gone" />
 
-                <!-- Register Button -->
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/registerBtn"
+                <!-- ✅ Register Button + ProgressBar trong FrameLayout -->
+                <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
-                    android:layout_marginTop="24dp"
-                    android:background="@drawable/brown_full_corner_bg"
-                    android:text="Create Account"
-                    android:textColor="@color/white"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:layout_marginTop="24dp">
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/registerBtn"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/brown_full_corner_bg"
+                        android:text="Create Account"
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <ProgressBar
+                        android:id="@+id/registerProgress"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="center"
+                        android:indeterminateTint="@color/white"
+                        android:visibility="gone" />
+
+                </FrameLayout>
 
             </LinearLayout>
 

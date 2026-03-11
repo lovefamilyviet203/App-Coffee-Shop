@@ -7,11 +7,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.enableEdgeToEdge
 import com.example.coffeeshop.Helper.ManagmentUser
 import com.example.coffeeshop.databinding.ActivityRegisterBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
+import com.example.coffeeshop.Helper.TinyDB
 
 class RegisterActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRegisterBinding
-    private lateinit var managmentUser: ManagmentUser
+    private lateinit var tinyDB: TinyDB
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,7 +22,7 @@ class RegisterActivity : AppCompatActivity() {
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        managmentUser = ManagmentUser(this)
+        tinyDB = TinyDB(this)
 
         binding.backBtn.setOnClickListener { finish() }
 
@@ -74,19 +77,69 @@ class RegisterActivity : AppCompatActivity() {
             return
         }
 
-        // Attempt register
-        val result = managmentUser.register(name, email, phone, password)
+        showLoading(true)
 
-        when (result) {
-            ManagmentUser.RegisterResult.SUCCESS -> {
-                // Auto-login after register
-                managmentUser.login(email, password)
-                goToMain()
+        FirebaseAuth.getInstance()
+            .createUserWithEmailAndPassword(email, password)
+            .addOnSuccessListener { result ->
+                val uid = result.user?.uid ?: run {
+                    binding.registerBtn.isEnabled = true
+                    showError("Registration failed. Please try again.")
+                    return@addOnSuccessListener
+                }
+
+                // ✅ Lưu vào Realtime Database (nhất quán với Orders)
+                val userMap = hashMapOf(
+                    "uid" to uid,
+                    "name" to name,
+                    "email" to email,
+                    "phone" to phone,
+                    "createdAt" to System.currentTimeMillis()
+                )
+
+                FirebaseDatabase.getInstance().reference
+                    .child("Users")
+                    .child(uid)
+                    .setValue(userMap)
+                    .addOnSuccessListener {
+                        tinyDB.putString("profile_name", name)
+                        tinyDB.putString("profile_email", email)
+                        tinyDB.putString("profile_phone", phone)
+                        goToMain()
+                    }
+                    .addOnFailureListener {
+                        // DB lỗi nhưng Auth OK → vẫn cho vào app
+                        tinyDB.putString("profile_name", name)
+                        tinyDB.putString("profile_email", email)
+                        tinyDB.putString("profile_phone", phone)
+                        goToMain()
+                    }
+
+            .addOnFailureListener { e ->
+                showLoading(false)
+                when {
+                    e.message?.contains("email address is already in use") == true ->
+                        showError("This email is already registered")
+
+                    e.message?.contains("badly formatted") == true ->
+                        showError("Invalid email format")
+
+                    else ->
+                        showError("Registration failed: ${e.message}")
+                }
             }
-            ManagmentUser.RegisterResult.EMAIL_EXISTS -> {
-                binding.emailInput.error = "This email is already registered"
-                showError("An account with this email already exists")
-            }
+        }
+    }
+
+    private fun showLoading(isLoading: Boolean) {
+        if (isLoading) {
+            binding.registerBtn.isEnabled = false
+            binding.registerBtn.text = ""
+            binding.registerProgress.visibility = View.VISIBLE
+        } else {
+            binding.registerBtn.isEnabled = true
+            binding.registerBtn.text = "Create Account"
+            binding.registerProgress.visibility = View.GONE
         }
     }
 

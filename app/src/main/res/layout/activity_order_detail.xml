@@ -331,6 +331,20 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/cancelOrderBtn"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/brown_2_full_corner_bg"
+                android:text="Hủy đơn hàng"
+                android:textColor="#EF4444"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
         </LinearLayout>
     </ScrollView>
 
