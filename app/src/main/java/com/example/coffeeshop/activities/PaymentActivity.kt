@@ -6,10 +6,16 @@ import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.enableEdgeToEdge
+import com.example.coffeeshop.Helper.FirebaseOrderHelper
 import com.example.coffeeshop.Helper.ManagmentCart
 import com.example.coffeeshop.Helper.TinyDB
 import com.example.coffeeshop.databinding.ActivityPaymentBinding
 import com.example.coffeeshop.domain.ItemsModel
+import com.example.coffeeshop.domain.OrderModel
+import com.google.firebase.auth.FirebaseAuth
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class PaymentActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPaymentBinding
@@ -122,6 +128,60 @@ class PaymentActivity : AppCompatActivity() {
             }
         }
 
+        // Lấy email từ FirebaseAuth (ưu tiên) hoặc TinyDB
+        val auth = FirebaseAuth.getInstance()
+        val userEmail = auth.currentUser?.email
+            ?: tinyDB.getString("profile_email").ifEmpty { "guest@app.com" }
+        val userName = tinyDB.getString("profile_name").ifEmpty { userEmail.substringBefore("@") }
+
+        val subtotal = managmentCart.getTotalFee()
+        val delivery = 10.0
+        val tax = (subtotal * 0.02 * 100) / 100
+        val grandTotal = ((subtotal + tax + delivery) * 100) / 100
+
+        val paymentMethod = when {
+            binding.radioCard.isChecked -> "Card"
+            binding.radioCash.isChecked -> "Cash"
+            else -> "Wallet"
+        }
+
+        val orderId = "ORD${System.currentTimeMillis()}"
+        val dateTime = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
+
+        val order = OrderModel(
+            orderId = orderId,
+            userEmail = userEmail,
+            userName = userName,
+            items = managmentCart.getListCart(),
+            totalFee = subtotal,
+            deliveryFee = delivery,
+            tax = tax,
+            grandTotal = grandTotal,
+            address = address,
+            paymentMethod = paymentMethod,
+            dateTime = dateTime,
+            status = "Pending",
+            timestamp = System.currentTimeMillis()
+        )
+
+        // Disable nút tránh bấm 2 lần
+        binding.payNowBtn.isEnabled = false
+
+        // Lưu đơn hàng lên Firebase
+        FirebaseOrderHelper.saveOrder(order) { success ->
+            if (success) {
+                // Xóa giỏ hàng
+                tinyDB.putListObject("CartList", arrayListOf<ItemsModel>())
+
+                val intent = Intent(this, OrderSuccessActivity::class.java)
+                intent.putExtra("order_id", orderId)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                startActivity(intent)
+            } else {
+                binding.payNowBtn.isEnabled = true
+                Toast.makeText(this, "Connection error! Please try again", Toast.LENGTH_SHORT).show()
+            }
+        }
         // Save order count
         val currentCount = tinyDB.getInt("order_count")
         tinyDB.putInt("order_count", currentCount + 1)
@@ -130,7 +190,7 @@ class PaymentActivity : AppCompatActivity() {
         tinyDB.putListObject("CartList", arrayListOf<ItemsModel>())
 
         // Generate order ID
-        val orderId = "ORD${System.currentTimeMillis().toString().takeLast(6)}"
+        //val orderId = "ORD${System.currentTimeMillis().toString().takeLast(6)}"
 
         val intent = Intent(this, OrderSuccessActivity::class.java)
         intent.putExtra("order_id", orderId)

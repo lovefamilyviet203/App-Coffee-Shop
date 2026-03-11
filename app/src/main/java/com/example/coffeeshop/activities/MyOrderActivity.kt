@@ -10,6 +10,7 @@ import com.example.coffeeshop.Helper.ManagmentOrder
 import com.example.coffeeshop.Helper.TinyDB
 import com.example.coffeeshop.adapters.OrderAdapter
 import com.example.coffeeshop.databinding.ActivityMyOrderBinding
+import com.google.firebase.auth.FirebaseAuth
 
 class MyOrderActivity : AppCompatActivity() {
 
@@ -29,11 +30,12 @@ class MyOrderActivity : AppCompatActivity() {
     }
 
     private fun loadOrdersFromFirebase() {
-        val userEmail = tinyDB.getString("profile_email")
+        val auth = FirebaseAuth.getInstance()
+        val userEmail = auth.currentUser?.email
+            ?: tinyDB.getString("profile_email")
 
         if (userEmail.isEmpty()) {
-            // Guest user → load from local TinyDB
-            loadLocalOrders()
+            showEmpty()
             return
         }
 
@@ -42,9 +44,7 @@ class MyOrderActivity : AppCompatActivity() {
         FirebaseOrderHelper.listenUserOrders(userEmail)
             .observe(this) { orders ->
                 if (orders.isEmpty()) {
-                    binding.emptyLayout.visibility = View.VISIBLE
-                    binding.ordersRecyclerView.visibility = View.GONE
-                    binding.orderCountSummaryTxt.text = "0 orders"
+                    showEmpty()
                 } else {
                     binding.emptyLayout.visibility = View.GONE
                     binding.ordersRecyclerView.visibility = View.VISIBLE
@@ -57,18 +57,9 @@ class MyOrderActivity : AppCompatActivity() {
             }
     }
 
-    private fun loadLocalOrders() {
-        val orders = ManagmentOrder(this).getOrderList()
-        if (orders.isEmpty()) {
-            binding.emptyLayout.visibility = View.VISIBLE
-            binding.ordersRecyclerView.visibility = View.GONE
-            binding.orderCountSummaryTxt.text = "0 orders"
-        } else {
-            binding.emptyLayout.visibility = View.GONE
-            binding.ordersRecyclerView.visibility = View.VISIBLE
-            binding.orderCountSummaryTxt.text = "${orders.size} orders"
-            binding.ordersRecyclerView.layoutManager = LinearLayoutManager(this)
-            binding.ordersRecyclerView.adapter = OrderAdapter(orders, this)
-        }
+    private fun showEmpty() {
+        binding.emptyLayout.visibility = View.VISIBLE
+        binding.ordersRecyclerView.visibility = View.GONE
+        binding.orderCountSummaryTxt.text = "0 orders"
     }
 }

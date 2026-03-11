@@ -63,23 +63,49 @@
             android:orientation="vertical"
             android:padding="24dp">
 
-            <!-- Avatar -->
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/profileAvatar"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_gravity="center"
-                android:scaleType="centerCrop"
-                app:shapeAppearanceOverlay="@style/cornerImage"
-                app:srcCompat="@drawable/profile" />
+            <!-- Avatar + nút đổi ảnh -->
+            <FrameLayout
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_gravity="center">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/profileAvatar"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:scaleType="centerCrop"
+                    app:shapeAppearanceOverlay="@style/cornerImage"
+                    app:srcCompat="@drawable/profile" />
+
+                <!-- Icon camera góc dưới phải -->
+                <ImageView
+                    android:id="@+id/changeAvatarBtn"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="bottom|end"
+                    android:layout_margin="4dp"
+                    android:background="@drawable/brown_full_corner_bg"
+                    android:padding="6dp"
+                    android:src="@android:drawable/ic_menu_camera"
+                    app:tint="@color/white" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center"
+                android:text="Nhấn vào ảnh để thay đổi"
+                android:textColor="@color/lightBrown"
+                android:textSize="11sp" />
 
             <TextView
                 android:id="@+id/profileNameTxt"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="8dp"
                 android:gravity="center"
-                android:text="Tina Anderson"
+                android:text="User"
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -90,7 +116,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:gravity="center"
-                android:text="tina@example.com"
+                android:text=""
                 android:textColor="@color/lightBrown"
                 android:textSize="14sp" />
 
