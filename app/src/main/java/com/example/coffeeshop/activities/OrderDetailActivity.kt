@@ -25,6 +25,7 @@ class OrderDetailActivity : AppCompatActivity() {
 
         val order = intent.getSerializableExtra("order") as? OrderModel
         if (order != null) {
+            currentOrder = order
             bindOrderData(order)
         }
 
@@ -106,13 +107,7 @@ class OrderDetailActivity : AppCompatActivity() {
             .setValue("Cancelled")
             .addOnSuccessListener {
                 Toast.makeText(this, "Đơn hàng đã được hủy", Toast.LENGTH_SHORT).show()
-
-                // Cập nhật UI ngay lập tức
-                binding.detailStatusBadge.text = "Cancelled"
-                binding.detailStatusBadge.setTextColor(
-                    android.graphics.Color.parseColor("#EF4444")
-                )
-                binding.cancelOrderBtn.visibility = View.GONE
+                finish()
             }
             .addOnFailureListener {
                 binding.cancelOrderBtn.isEnabled = true
